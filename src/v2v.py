@@ -2,31 +2,54 @@ import requests
 import json
 import speech_recognition as sr
 import client
+import pygame
+import time
 
 # Goal 1: Given text, use APIs to output virtual audio (client testing)
 # Goal 2: Use speech_recognition to get the text
 # Goal 3: Make GUI for voice to voice software
 # Goal 4: programatically set the output audio device and let the user change it (for fun, use it as an input for a third party voice chat program)
-## THE FOLLOWING IS DISCARDED AND BECAME OBSOLETE AS IT DOESNT MEET THE NEED
-# web-api used: lovo-open (further details of lovo-open at https://api-doc.lovo.ai/#tag/conversion)
-# Max length of text has to be <= 500 characters 
-# Speaker_id is an enum var of the list of voices you can choose from.
 
-# Private API key has to be hidden and not shown to the users of github and app inspectors
-# e.g) outside src, root dir and edit .gitignore
+def recognition():
+	r = sr.Recognizer()
+	
+	with sr.Microphone() as source:
+		print('Listening')
 
-def inst():
-	response = client.post('hello world! this is for testing!', 1,1,1)
+		r.pause_threshold = 0.7
+		# TODO: or pause hearing tongue clicking sound
+		audio = r.listen(source)	
+	try:
+		print('Recognizing')
+		query = r.recognize_google(audio, language='en-in')
+	except Exception as e:
+		print(e)
+		return "None"
+	return query
 
-# a binary of an audio file will be sent as a response
-		
+def inst(text):
+	# a binary of an audio file will be sent as a response	
+	# TODO: take more param values to set up properly
+	response = client.post(text, 1,1,1)
 	filename = 'assets/temp1.mp3'
 	with open(filename, 'wb') as f:
 		f.write(response.content)
+	
+	return filename
 
-
+def audio_play(filename):
+	pygame.mixer.music.load(filename)
+	pygame.mixer.music.play(1)
+	while (pygame.mixer.get_busy()==False):
+		time.sleep(500)	
 
 def main():
-	inst()
+	#initialize pygame
+	pygame.mixer.init()
+
+	text = recognition()
+	filename = inst(text)
+	audio_play(filename)
+		
 
 if __name__ == "__main__": main()

@@ -3,4 +3,7 @@ Voice recognition to Speech
 
 Installation: This project recommends Python 3.7 or higher.
 
-Prerequisites: speech_recognition: pip install SpeechRecognition
+Prerequisites: 
+	speech_recognition: pip install SpeechRecognition
+	pygame: pip install pygame
+
