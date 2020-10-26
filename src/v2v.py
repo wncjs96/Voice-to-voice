@@ -4,26 +4,25 @@ import speech_recognition as sr
 import client
 import pygame
 import time
+import threading
 
 # Goal 1: Given text, use APIs to output virtual audio (client testing)
 # Goal 2: Use speech_recognition to get the text
 # Goal 3: Make GUI for voice to voice software
 # Goal 4: programatically set the output audio device and let the user change it (for fun, use it as an input for a third party voice chat program)
 
-def recognition():
-	r = sr.Recognizer()
-	
+def recognition(r):
 	with sr.Microphone() as source:
 		print('Listening')
 
-		r.pause_threshold = 0.7
+		#r.pause_threshold = 0.7
 		# TODO: or pause hearing tongue clicking sound
 		audio = r.listen(source)	
 	try:
 		print('Recognizing')
 		query = r.recognize_google(audio, language='en-in')
 	except Exception as e:
-		print(e)
+		print("EXCEPTION!!\n\n" + e)
 		return "None"
 	return query
 
@@ -31,25 +30,37 @@ def inst(text):
 	# a binary of an audio file will be sent as a response	
 	# TODO: take more param values to set up properly
 	response = client.post(text, 1,1,1)
-	filename = 'assets/temp1.mp3'
+	filename = 'temp1.wav'
 	with open(filename, 'wb') as f:
 		f.write(response.content)
 	
-	return filename
+	return 'assets/' + filename
 
 def audio_play(filename):
+	lock.acquire()
 	pygame.mixer.music.load(filename)
-	pygame.mixer.music.play(1)
-	while (pygame.mixer.get_busy()==False):
-		time.sleep(500)	
+	pygame.mixer.music.play(0)
+	lock.release()
 
-def main():
-	#initialize pygame
+def def_init():
+	#you can change+ mp3 rate, pass it as an argument of mixer.init()
 	pygame.mixer.init()
+	return sr.Recognizer()
+	
+	
+lock = threading.Lock()
+def main():
 
-	text = recognition()
-	filename = inst(text)
-	audio_play(filename)
-		
+	#TODO: GUI textbox to type, drodown to decide the settings, , GREEN/RED BUTTON
+
+	#initialize pygame
+	r = def_init()
+
+	count = 0
+	while count < 9:
+		text = recognition(r)
+		filename = inst(text)
+		audio_play(filename)
+		count=count+1
 
 if __name__ == "__main__": main()
