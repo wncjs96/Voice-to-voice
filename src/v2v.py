@@ -5,6 +5,9 @@ import client
 import pygame
 import time
 import threading
+import pathlib
+import re
+import os
 
 # Goal 1: Given text, use APIs to output virtual audio (client testing)
 # Goal 2: Use speech_recognition to get the text
@@ -20,9 +23,11 @@ def recognition(r):
 		audio = r.listen(source)	
 	try:
 		print('Recognizing')
-		query = r.recognize_google(audio, language='en-in')
+		#query = r.recognize_google(audio, language='en-in')
+		#Korean Setup
+		query = r.recognize_google(audio, language='ko-kr')
 	except Exception as e:
-		print("EXCEPTION!!\n\n" + e)
+		print("EXCEPTION!!")
 		return "None"
 	return query
 
@@ -31,36 +36,53 @@ def inst(text):
 	# TODO: take more param values to set up properly
 	response = client.post(text, 1,1,1)
 	filename = 'temp1.wav'
-	with open(filename, 'wb') as f:
+	#dir_path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
+	#file_path = dir_path + '/assets/' + filename
+	#Îprint(dir_path)
+	#print(file_path)
+	with open('assets/' + filename, 'wb') as f:
 		f.write(response.content)
-	
 	return 'assets/' + filename
 
 def audio_play(filename):
 	lock.acquire()
 	pygame.mixer.music.load(filename)
 	pygame.mixer.music.play(0)
+	while pygame.mixer.music.get_busy() == True:
+		continue
+	pygame.mixer.music.stop()
+	pygame.mixer.quit()
 	lock.release()
 
 def def_init():
 	#you can change+ mp3 rate, pass it as an argument of mixer.init()
 	pygame.mixer.init()
 	return sr.Recognizer()
+
+def clearfiles():
+	curr = str(pathlib.Path().absolute()) + '\\assets'
 	
+	regex = re.compile('temp(\d)*\.(.)*')
+	
+	for root,dirs,files in os.walk(curr):
+		for file in files:
+			if regex.match(file):
+				os.unlink('assets/' + file)
+
 	
 lock = threading.Lock()
 def main():
 
 	#TODO: GUI textbox to type, drodown to decide the settings, , GREEN/RED BUTTON
-
 	#initialize pygame
 	r = def_init()
 
 	count = 0
-	while count < 9:
-		text = recognition(r)
-		filename = inst(text)
-		audio_play(filename)
-		count=count+1
+	
+	text = recognition(r)
+	filename = inst(text)
+	audio_play(filename)
+
+	return
 
 if __name__ == "__main__": main()
