@@ -32,10 +32,20 @@ def post(text, speaker_id, volume, speed):
 
 	return response
 
-	# outfile in form of temp1.mp3 ... temp 100.mp3
-	filename = 'assets/temp1.mp3'
-	with open(filename, 'wb') as f:
-		f.write(response.content)
+#	# outfile in form of temp1.mp3 ... temp 100.mp3
+#	filename = 'assets/temp1.mp3'
+#	with open(filename, 'wb') as f:
+#		f.write(response.content)
+
+#TODO: get list of voices
+def get_voices():
+	url = 'http://127.0.0.1:5000/api/voices'
+	headers = {
+		'Content-Type': 'application/json; charset=utf-8'
+	}	
+
+	response = requests.get(url, headers=headers)
+	return response
 
 def main():
 	client_post()
